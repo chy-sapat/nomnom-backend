@@ -21,3 +21,5 @@ app.use("/api/v1/ratings", RatingRouter);
 app.listen(port, () => {
   console.log(`Server Started at port: ${port}`);
 });
+
+export default app;
