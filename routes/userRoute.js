@@ -2,20 +2,18 @@ import express from "express";
 import {
   deleteUser,
   getUserInfo,
-  Login,
-  Register,
   updateUserInfo,
   followUser,
   unfollowUser,
   getFollowers,
   getFollowing,
+  create,
 } from "../controller/userController.js";
 
 const router = express.Router();
 
-router.post("/register", Register);
-router.post("/login", Login);
-router.get("/get/:id", getUserInfo);
+router.post("/create", create);
+router.get("/:id", getUserInfo);
 router.patch("/update/:id", updateUserInfo);
 router.delete("/delete/:id", deleteUser);
 router.post("/:userId/follow", followUser);

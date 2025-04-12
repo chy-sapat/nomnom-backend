@@ -2,45 +2,19 @@ import bcrypt from "bcrypt";
 import { UserModel } from "../models/User.js";
 import jwt from "jsonwebtoken";
 
-const Register = async (req, res) => {
+const create = async (req, res) => {
   try {
-    const { fullname, username, email, password } = req.body;
-    const existingUser = await UserModel.findOne({ email: email });
+    const { fullname, username } = req.body;
+    const existingUser = await UserModel.findOne({ username: username });
     if (existingUser) {
       return res.status(400).json({ message: "User already exist" });
     }
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
     const user = new UserModel({
       fullname,
       username,
-      email,
-      password: hashedPassword,
     });
     await user.save();
     res.status(200).json({ message: "User Created Successfully" });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-const Login = async (req, res) => {
-  try {
-    const { username, password } = req.body;
-
-    const user = await UserModel.findOne({ username: username }).select("+password");
-    if (!user) {
-      return res
-        .status(404)
-        .json({ message: `User ${username} doesn't exist` });
-    }
-    console.log(user);
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(403).json({ message: "Incorrect Password" });
-    }
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-    res.status(200).json({ userId: user._id, token });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -214,8 +188,7 @@ const getFollowing = async (req, res) => {
 };
 
 export {
-  Register,
-  Login,
+  create,
   getUserInfo,
   updateUserInfo,
   deleteUser,
