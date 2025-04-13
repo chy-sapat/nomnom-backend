@@ -11,8 +11,8 @@ const create = async (req, res) => {
       username: userName,
     });
     await user.save();
-    console.log("✅ User saved:", savedUser);
-    res.status(200).json({ message: "User Created Successfully" });
+    console.log("✅ User saved:", user);
+    res.status(201).json({ message: "User Created Successfully" });
   } catch (error) {
     console.error("❌ Error saving user:", error);
     res.status(500).json({ message: error.message });
