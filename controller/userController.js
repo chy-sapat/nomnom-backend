@@ -1,21 +1,21 @@
 import bcrypt from "bcrypt";
 import { UserModel } from "../models/User.js";
-import jwt from "jsonwebtoken";
 
-const create = async (req, res) => {
+const create = async (req, res) => {  
   try {
-    const { fullname, username } = req.body;
-    const existingUser = await UserModel.findOne({ username: username });
-    if (existingUser) {
-      return res.status(400).json({ message: "User already exist" });
-    }
+    console.log("Clerk Auth Data: ", req.auth);
+    const { userId } = req.auth;
+    const { userName, fullname } = req.body;
     const user = new UserModel({
+      clerkId: userId,
       fullname,
-      username,
+      username: userName,
     });
     await user.save();
+    console.log("✅ User saved:", savedUser);
     res.status(200).json({ message: "User Created Successfully" });
   } catch (error) {
+    console.error("❌ Error saving user:", error);
     res.status(500).json({ message: error.message });
   }
 };

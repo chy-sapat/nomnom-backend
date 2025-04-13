@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 const UserSchema = new mongoose.Schema(
   {
+    clerkId: { type: String},
     fullname: { type: String, trim: true, required: true },
     username: { type: String, required: true, unique: true, trim: true },
     // Hide password from queries

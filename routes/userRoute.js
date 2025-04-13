@@ -9,6 +9,7 @@ import {
   getFollowing,
   create,
 } from "../controller/userController.js";
+import { requireAuth } from "@clerk/express";
 
 const router = express.Router();
 
