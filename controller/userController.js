@@ -3,7 +3,6 @@ import { UserModel } from "../models/User.js";
 
 const create = async (req, res) => {  
   try {
-    console.log("Clerk Auth Data: ", req.auth);
     const { userId } = req.auth;
     const { userName, fullname } = req.body;
     const user = new UserModel({
