@@ -6,22 +6,6 @@ const RepliesSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-const IngredientSchema = new mongoose.Schema({
-  ingredient: { type: String, required: true },
-  quantity: { type: Number, required: true },
-  unit: { type: String, required: true }, // Example: "grams", "cups", "tbsp"
-});
-
-const DirectionSchema = new mongoose.Schema({
-  step: { type: String, required: true },
-  imageUrl: { type: String }, // Optional step-by-step image
-});
-
-const NutritionalValueSchema = new mongoose.Schema({
-  proteinPerServing: { type: Number, required: true },
-  caloriePerServing: { type: Number, required: true },
-});
-
 const RatingSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   rating: { type: Number, required: true, min: 1, max: 5 },
@@ -33,9 +17,8 @@ const RecipeSchema = new mongoose.Schema(
   {
     title: { type: String, required: true, trim: true },
     description: { type: String, trim: true },
-    ingredients: [IngredientSchema],
-    directions: [DirectionSchema],
-    nutritionalValue: NutritionalValueSchema,
+    ingredients: [{ type: String }],
+    directions: [{ type: String}],
     ratings: [RatingSchema],
     labels: [{ type: String, trim: true }],
     author: {
@@ -43,13 +26,14 @@ const RecipeSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    difficulty: {type: String},
     servings: { type: Number, required: true },
-    prepTime: { type: Number, required: true }, // In minutes
-    cookTime: { type: Number, required: true }, // In minutes
+    cookTime: { type: Number, default:  0},
     averageRating: { type: Number, default: 0 },
     totalRating: { type: Number, default: 0 }, // Sum of all ratings
     ratingCount: { type: Number, default: 0 }, // Number of ratings
     views: { type: Number, default: 0 }, // Track recipe views
+    image: { type: String, default: ""}
   },
   { timestamps: true }
 );

@@ -14,7 +14,7 @@ import { requireAuth } from "@clerk/express";
 const router = express.Router();
 
 router.post("/create", create);
-router.get("/:id", getUserInfo);
+router.get("/", requireAuth(), getUserInfo);
 router.patch("/update/:id", updateUserInfo);
 router.delete("/delete/:id", deleteUser);
 router.post("/:userId/follow", followUser);

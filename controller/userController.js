@@ -1,5 +1,7 @@
 import bcrypt from "bcrypt";
 import { UserModel } from "../models/User.js";
+import { getAuth } from "@clerk/express";
+import { RecipeModel } from "../models/Recipe.js";
 
 const create = async (req, res) => {  
   try {
@@ -21,8 +23,8 @@ const create = async (req, res) => {
 
 const getUserInfo = async (req, res) => {
   try {
-    const userId = req.params.id;
-    const user = await UserModel.findOne({ _id: userId });
+    const { userId } = getAuth(req);
+    const user = await UserModel.findOne({ clerkId: userId });
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -185,6 +187,18 @@ const getFollowing = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+const FetchSaved = async (req, res) => {
+  try {
+    const {userId} = req.params;
+    const user = await UserModel.findById(userId);
+    const savedRecipe = await RecipeModel.find({ _id: { $in: user.savedRecipes} });
+
+    res.status(200).json({ savedRecipe });
+  } catch (error) {
+    res.status(500).json({ error: error.message })
+  }
+}
 
 export {
   create,

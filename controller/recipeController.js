@@ -1,4 +1,5 @@
 import { RecipeModel } from "../models/Recipe.js";
+import { buildTFIDF, getSimilarRecipesFromInput } from "../recommendations/recommendation.js";
 
 // Create a new recipe
 const createRecipe = async (req, res) => {
@@ -70,4 +71,16 @@ const deleteRecipe = async (req, res) => {
   }
 };
 
+const getSimilarRecipes = async (res, req) => {
+  try {
+    const { id } = req.params;
+    const recipe = await RecipeModel.findById(id);
+    const recipes = await RecipeModel.find({});
+    buildTFIDF(recipes);
+    const similar = getSimilarRecipesFromInput(recipe.ingredients, recipe.labels);
+    res.status(200).json({ similarRecipes: similar})
+  } catch (error) {
+    res.status(500);
+  }
+} 
 export { createRecipe, getRecipes, getRecipeById, updateRecipe, deleteRecipe };
