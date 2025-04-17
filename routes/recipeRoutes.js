@@ -5,6 +5,7 @@ import {
   getRecipeById,
   updateRecipe,
   deleteRecipe,
+  getSimilarRecipes
 } from "../controller/recipeController.js";
 
 const router = express.Router();

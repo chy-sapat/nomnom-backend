@@ -77,7 +77,7 @@ function getSimilarRecipesByInput(ingredients, labels, topN = 5) {
     .map(({ index }) => recipes[index]);
 }
 
-module.exports = {
+export {
   buildTFIDF,
   getSimilarRecipesByIndex,
   getSimilarRecipesByInput

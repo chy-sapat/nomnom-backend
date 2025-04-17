@@ -1,5 +1,5 @@
 import { RecipeModel } from "../models/Recipe.js";
-import { buildTFIDF, getSimilarRecipesFromInput } from "../recommendations/recommendation.js";
+import { buildTFIDF, getSimilarRecipesByInput } from "../recommendations/recommendation.js";
 
 // Create a new recipe
 const createRecipe = async (req, res) => {
@@ -83,4 +83,4 @@ const getSimilarRecipes = async (res, req) => {
     res.status(500);
   }
 } 
-export { createRecipe, getRecipes, getRecipeById, updateRecipe, deleteRecipe };
+export { createRecipe, getRecipes, getRecipeById, updateRecipe, deleteRecipe, getSimilarRecipes };
