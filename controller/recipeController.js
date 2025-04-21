@@ -1,5 +1,8 @@
 import { RecipeModel } from "../models/Recipe.js";
-import { buildTFIDF, getSimilarRecipesByInput } from "../recommendations/recommendation.js";
+import {
+  buildTFIDF,
+  getSimilarRecipesByInput,
+} from "../recommendations/recommendation.js";
 
 // Create a new recipe
 const createRecipe = async (req, res) => {
@@ -15,10 +18,20 @@ const createRecipe = async (req, res) => {
 // Get all recipes
 const getRecipes = async (req, res) => {
   try {
-    const recipes = await RecipeModel.find().populate(
-      "author",
-      "fullname username"
-    );
+    const { latest } = req.query;
+
+    let recipes;
+
+    if (latest === "true") {
+      recipes = await RecipeModel.find()
+        .sort({ createdAt: -1 })
+        .populate("author", "fullname username");
+    } else {
+      recipes = await RecipeModel.find().populate(
+        "author",
+        "fullname username"
+      );
+    }
     res.status(200).json(recipes);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -35,7 +48,17 @@ const getRecipeById = async (req, res) => {
     if (!recipe) {
       return res.status(404).json({ message: "Recipe not found" });
     }
-    res.status(200).json(recipe);
+    const allRecipes = await RecipeModel.find({ _id: { $ne: req.params.id } })
+      .populate("author", "fullname")
+      .select("title averageRating image ingredients labels")
+      .lean();
+    buildTFIDF(allRecipes);
+    const similar = getSimilarRecipesByInput(
+      recipe.ingredients,
+      recipe.labels,
+      2
+    );
+    res.status(200).json({ recipe, similar });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -71,16 +94,91 @@ const deleteRecipe = async (req, res) => {
   }
 };
 
-const getSimilarRecipes = async (res, req) => {
+const getSimilarByIngredientAndLabels = async (req, res) => {
   try {
     const { id } = req.params;
     const recipe = await RecipeModel.findById(id);
-    const recipes = await RecipeModel.find({});
+    const recipes = await RecipeModel.find({ _id: { $ne: id } }).lean();
     buildTFIDF(recipes);
-    const similar = getSimilarRecipesFromInput(recipe.ingredients, recipe.labels);
-    res.status(200).json({ similarRecipes: similar})
+    const similar = getSimilarRecipesByInput(
+      recipe.ingredients,
+      recipe.labels,
+      2
+    );
+    res.status(200).json({ similarRecipes: similar });
   } catch (error) {
-    res.status(500);
+    res.status(500).json({ message: error.message });
+    console.log(error);
   }
-} 
-export { createRecipe, getRecipes, getRecipeById, updateRecipe, deleteRecipe, getSimilarRecipes };
+};
+
+const searchRecipe = async (req, res) => {
+  const { q, ingredient, minIngredients, maxIngredients } = req.query;
+
+  try {
+    const query = {};
+
+    if (q) {
+      const regex = new RegExp(q, "i");
+      query.$or = [{ title: regex }, { ingredients: regex }];
+    }
+
+    if (ingredient) {
+      query.ingredients = query.ingredients || {};
+      query.ingredients.$in = [new RegExp(ingredient, "i")];
+    }
+
+    if (minIngredients) {
+      query["ingredients.0"] = { $exists: true };
+      query.$expr = query.$expr || {};
+      query.$expr.$gte = [{ $size: "$ingredients" }, parseInt(minIngredients)];
+    }
+
+    if (maxIngredients) {
+      query.$expr = query.$expr || {};
+      query.$expr.$lte = [{ $size: "$ingredients" }, parseInt(maxIngredients)];
+    }
+
+    const recipes = await RecipeModel.find(query).populate(
+      "author",
+      "fullname username"
+    );
+    res.status(200).json(recipes);
+  } catch (err) {
+    console.error("Search error:", err);
+    res.status(500).json({ message: "Server error during search." });
+  }
+};
+
+const saveRecipe = async (req, res) => {
+  const { userId, recipeId } = req.body;
+  try {
+    const user = await UserModel.findById(userId);
+    const recipe = await RecipeModel.findById(recipeId);
+
+    if (!user || !recipe) {
+      return res.status(404).json({ error: "User or Recipe not found" });
+    }
+    const alreadySaved = user.savedRecipes.includes(recipeId);
+    if (alreadySaved) {
+      return res.status(400).json({ error: "Recipe already saved" });
+    }
+
+    user.savedRecipes.push(recipeId);
+    await user.save();
+
+    res.status(200).json({ message: "Recipe saved successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+export {
+  createRecipe,
+  getRecipes,
+  getRecipeById,
+  updateRecipe,
+  deleteRecipe,
+  getSimilarByIngredientAndLabels,
+  searchRecipe,
+  saveRecipe,
+};

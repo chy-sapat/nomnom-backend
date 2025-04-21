@@ -34,9 +34,24 @@ function getRecipeVector(docIndex) {
 
 
 function getInputVector(ingredients, labels) {
-  const text = [...ingredients, ...labels].join(' ').toLowerCase();
-  return allTerms.map(term => tfidf.tfidf(term, text));
+  const text = [...ingredients, ...labels]
+    .map(str => str.toLowerCase().trim())
+    .join(" ");
+
+  // Add the input as a temporary document
+  tfidf.addDocument(text);
+  const inputIndex = tfidf.documents.length - 1;
+
+  const vector = allTerms.map(term => {
+    return tfidf.tfidf(term, inputIndex);
+  });
+
+  // Remove the temporary document
+  tfidf.documents.pop();
+
+  return vector;
 }
+
 
 
 function cosineSimilarity(vecA, vecB) {
@@ -65,16 +80,19 @@ function getSimilarRecipesByIndex(targetIndex, topN = 5) {
 function getSimilarRecipesByInput(ingredients, labels, topN = 5) {
   const inputVector = getInputVector(ingredients, labels);
 
-  const scores = recipes.map((_, i) => {
+  const scores = recipes.map((recipe, i) => {
     const vector = getRecipeVector(i);
-    return cosineSimilarity(inputVector, vector);
+    const score = cosineSimilarity(inputVector, vector);
+    return { recipe, score };
   });
 
   return scores
-    .map((score, i) => ({ score, index: i }))
     .sort((a, b) => b.score - a.score)
     .slice(0, topN)
-    .map(({ index }) => recipes[index]);
+    .map(({ recipe, score }) => ({
+      ...recipe,
+      similarity: score.toFixed(3), // rounded to 3 decimals (optional)
+    }));
 }
 
 export {
