@@ -3,7 +3,7 @@ import { UserModel } from "../models/User.js";
 import { getAuth } from "@clerk/express";
 import { RecipeModel } from "../models/Recipe.js";
 
-const create = async (req, res) => {  
+const create = async (req, res) => {
   try {
     const { userId } = req.auth;
     const { userName, fullname } = req.body;
@@ -51,6 +51,7 @@ const deleteUser = async (req, res) => {
   try {
     const userId = req.params.id;
     await UserModel.findByIdAndDelete(userId);
+    await RecipeModel.deleteMany({ author: userId });
     res.status(200).json({ message: "User Deleted Successfully" });
   } catch (error) {
     res.status(500);
@@ -190,15 +191,17 @@ const getFollowing = async (req, res) => {
 
 const FetchSaved = async (req, res) => {
   try {
-    const {userId} = req.params;
+    const { userId } = req.params;
     const user = await UserModel.findById(userId);
-    const savedRecipe = await RecipeModel.find({ _id: { $in: user.savedRecipes} });
+    const savedRecipe = await RecipeModel.find({
+      _id: { $in: user.savedRecipes },
+    });
 
     res.status(200).json({ savedRecipe });
   } catch (error) {
-    res.status(500).json({ error: error.message })
+    res.status(500).json({ error: error.message });
   }
-}
+};
 
 export {
   create,

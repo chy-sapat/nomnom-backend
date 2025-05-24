@@ -1,4 +1,5 @@
 import { RecipeModel } from "../models/Recipe.js";
+import { UserModel } from "../models/User.js";
 import {
   buildTFIDF,
   getSimilarRecipesByInput,
@@ -172,6 +173,23 @@ const saveRecipe = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+const getUserRecipes = async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const recipes = await RecipeModel.find({ author: userId }).populate(
+      "author",
+      "fullname username"
+    );
+    if (!recipes || recipes.length === 0) {
+      return res.status(404).json({ message: "No recipes found" });
+    }
+    res.status(200).json(recipes);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 export {
   createRecipe,
   getRecipes,
@@ -181,4 +199,5 @@ export {
   getSimilarByIngredientAndLabels,
   searchRecipe,
   saveRecipe,
+  getUserRecipes,
 };

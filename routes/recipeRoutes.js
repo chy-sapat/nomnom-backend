@@ -8,6 +8,7 @@ import {
   getSimilarByIngredientAndLabels,
   searchRecipe,
   saveRecipe,
+  getUserRecipes,
 } from "../controller/recipeController.js";
 
 const router = express.Router();
@@ -20,5 +21,6 @@ router.patch("/:id", updateRecipe);
 router.delete("/:id", deleteRecipe);
 router.get("/getSimilar/:id", getSimilarByIngredientAndLabels);
 router.post("/save-recipe", saveRecipe);
+router.get("/getUserRecipes/:userId", getUserRecipes);
 
 export { router as RecipeRouter };
