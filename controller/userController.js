@@ -2,6 +2,7 @@ import bcrypt from "bcrypt";
 import { UserModel } from "../models/User.js";
 import { getAuth } from "@clerk/express";
 import { RecipeModel } from "../models/Recipe.js";
+import { PreferenceModel } from "../models/Preference.js";
 
 const create = async (req, res) => {
   try {
@@ -14,7 +15,7 @@ const create = async (req, res) => {
     });
     await user.save();
     console.log("✅ User saved:", user);
-    res.status(201).json({ message: "User Created Successfully" });
+    res.status(201).json({ message: "User Created Successfully", user });
   } catch (error) {
     console.error("❌ Error saving user:", error);
     res.status(500).json({ message: error.message });
@@ -52,6 +53,7 @@ const deleteUser = async (req, res) => {
     const userId = req.params.id;
     await UserModel.findByIdAndDelete(userId);
     await RecipeModel.deleteMany({ author: userId });
+    await PreferenceModel.deleteMany({ userID: userId });
     res.status(200).json({ message: "User Deleted Successfully" });
   } catch (error) {
     res.status(500);

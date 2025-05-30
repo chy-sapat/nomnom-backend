@@ -1,5 +1,7 @@
+import { PreferenceModel } from "../models/Preference.js";
 import { RecipeModel } from "../models/Recipe.js";
 import { UserModel } from "../models/User.js";
+import { rankRecipes } from "../recommendations/preferenceFilter.js";
 import {
   buildTFIDF,
   getSimilarRecipesByInput,
@@ -19,19 +21,30 @@ const createRecipe = async (req, res) => {
 // Get all recipes
 const getRecipes = async (req, res) => {
   try {
-    const { latest } = req.query;
+    const { latest, clerkId } = req.query;
 
     let recipes;
 
     if (latest === "true") {
       recipes = await RecipeModel.find()
         .sort({ createdAt: -1 })
-        .populate("author", "fullname username");
+        .populate("author", "fullname username")
+        .lean();
     } else {
-      recipes = await RecipeModel.find().populate(
-        "author",
-        "fullname username"
-      );
+      recipes = await RecipeModel.find()
+        .populate("author", "fullname username")
+        .lean();
+    }
+
+    if (clerkId) {
+      const preference = await PreferenceModel.findOne({ clerkId });
+      if (preference) {
+        const prefData = {
+          dietaryPreference: preference.dietaryPreference || [],
+          allergies: preference.allergies || [],
+        };
+        recipes = rankRecipes(recipes, prefData);
+      }
     }
     res.status(200).json(recipes);
   } catch (error) {
@@ -104,7 +117,7 @@ const getSimilarByIngredientAndLabels = async (req, res) => {
     const similar = getSimilarRecipesByInput(
       recipe.ingredients,
       recipe.labels,
-      2
+      10
     );
     res.status(200).json({ similarRecipes: similar });
   } catch (error) {
