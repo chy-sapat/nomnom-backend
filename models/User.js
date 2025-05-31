@@ -2,10 +2,9 @@ import mongoose from "mongoose";
 
 const UserSchema = new mongoose.Schema(
   {
-    clerkId: { type: String},
+    clerkId: { type: String },
     fullname: { type: String, trim: true, required: true },
     username: { type: String, required: true, unique: true, trim: true },
-    // Hide password from queries
     description: { type: String, default: "", trim: true },
     imageUrl: { type: String, default: "" },
     bannerImageUrl: { type: String, default: "" }, // User profile banner

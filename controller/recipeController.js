@@ -40,8 +40,8 @@ const getRecipes = async (req, res) => {
       const preference = await PreferenceModel.findOne({ clerkId });
       if (preference) {
         const prefData = {
-          dietaryPreference: preference.dietaryPreference || [],
-          allergies: preference.allergies || [],
+          dietaryPreference: preference.dietaryPreference,
+          allergies: preference.allergies,
         };
         recipes = rankRecipes(recipes, prefData);
       }

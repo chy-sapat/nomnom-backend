@@ -18,7 +18,7 @@ const RecipeSchema = new mongoose.Schema(
     title: { type: String, required: true, trim: true },
     description: { type: String, trim: true },
     ingredients: [{ type: String }],
-    directions: [{ type: String}],
+    directions: [{ type: String }],
     ratings: [RatingSchema],
     labels: [{ type: String, trim: true }],
     author: {
@@ -26,14 +26,14 @@ const RecipeSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    difficulty: {type: String},
-    servings: { type: Number, required: true },
-    cookTime: { type: Number, default:  0},
+    difficulty: { type: String },
+    servings: { type: Number, default: 1 },
+    cookTime: { type: Number, default: 0 },
     averageRating: { type: Number, default: 0 },
     totalRating: { type: Number, default: 0 }, // Sum of all ratings
     ratingCount: { type: Number, default: 0 }, // Number of ratings
     views: { type: Number, default: 0 }, // Track recipe views
-    image: { type: String, default: ""}
+    image: { type: String, default: "" },
   },
   { timestamps: true }
 );

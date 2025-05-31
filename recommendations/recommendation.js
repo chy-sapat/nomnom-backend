@@ -58,21 +58,6 @@ function cosineSimilarity(vecA, vecB) {
   return dot / (magA * magB || 1);
 }
 
-function getSimilarRecipesByIndex(targetIndex, topN = 5) {
-  const targetVector = getRecipeVector(targetIndex);
-  const scores = recipes.map((_, i) => {
-    if (i === targetIndex) return -1;
-    const vector = getRecipeVector(i);
-    return cosineSimilarity(targetVector, vector);
-  });
-
-  return scores
-    .map((score, i) => ({ score, index: i }))
-    .sort((a, b) => b.score - a.score)
-    .slice(0, topN)
-    .map(({ index }) => recipes[index]);
-}
-
 function getSimilarRecipesByInput(ingredients, labels, topN = 5) {
   const inputVector = getInputVector(ingredients, labels);
 
@@ -91,4 +76,4 @@ function getSimilarRecipesByInput(ingredients, labels, topN = 5) {
     }));
 }
 
-export { buildTFIDF, getSimilarRecipesByIndex, getSimilarRecipesByInput };
+export { buildTFIDF, getSimilarRecipesByInput };
