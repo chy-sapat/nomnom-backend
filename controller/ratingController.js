@@ -4,8 +4,8 @@ import { RecipeModel } from "../models/Recipe.js";
 const addOrUpdateRating = async (req, res) => {
   try {
     const { recipeId } = req.params;
-    const { rating, comments } = req.body;
-    const userId = req.user.id; // Authenticated user ID
+    const { userId, rating, comments } = req.body;
+    // const userId = req.user.id; // Authenticated user ID
 
     if (rating < 1 || rating > 5) {
       return res
@@ -49,8 +49,8 @@ const addOrUpdateRating = async (req, res) => {
 // Delete Rating
 const deleteRating = async (req, res) => {
   try {
-    const { recipeId } = req.params;
-    const userId = req.user.id; // Authenticated user ID
+    const { recipeId, userId } = req.params;
+    // const userId = req.user.id; // Authenticated user ID
 
     const recipe = await RecipeModel.findById(recipeId);
     if (!recipe) {
@@ -87,7 +87,7 @@ const getRecipeRatings = async (req, res) => {
     const { recipeId } = req.params;
     const recipe = await RecipeModel.findById(recipeId).populate(
       "ratings.userId",
-      "fullname username imageUrl"
+      "fullname username"
     );
 
     if (!recipe) {
