@@ -35,13 +35,14 @@ const addOrUpdateRating = async (req, res) => {
 
     // Calculate new average rating
     const totalRatingSum = recipe.ratings.reduce((sum, r) => sum + r.rating, 0);
-    recipe.averageRating = totalRatingSum / recipe.totalRatings;
+    recipe.averageRating = totalRatingSum / (recipe.ratings.length || 1);
 
     await recipe.save();
     res
       .status(200)
       .json({ message: "Rating added/updated successfully", recipe });
   } catch (error) {
+    console.log(error.message);
     res.status(500).json({ error: error.message });
   }
 };
@@ -77,6 +78,7 @@ const deleteRating = async (req, res) => {
     await recipe.save();
     res.status(200).json({ message: "Rating deleted successfully", recipe });
   } catch (error) {
+    console.log(error.message);
     res.status(500).json({ error: error.message });
   }
 };

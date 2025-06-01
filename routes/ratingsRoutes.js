@@ -6,13 +6,13 @@ import {
   addReplyToRating,
   deleteReplyFromRating,
   editReplyOnRating,
-  getRepliesForRating
+  getRepliesForRating,
 } from "../controller/ratingController.js";
 
 const router = express.Router();
 
 router.post("/:recipeId/rate", addOrUpdateRating);
-router.delete("/:recipeId/rate", deleteRating);
+router.delete("/:recipeId/rate/:userId", deleteRating);
 router.get("/:recipeId/ratings", getRecipeRatings);
 router.post("/:recipeId/rating/:ratingId/reply", addReplyToRating);
 router.put("/:recipeId/rating/:ratingId/reply/:replyId", editReplyOnRating);

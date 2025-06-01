@@ -203,6 +203,48 @@ const getUserRecipes = async (req, res) => {
   }
 };
 
+const getUserSavedRecipes = async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const user = await UserModel.findById(userId);
+    if (!user || !user.savedRecipes || user.savedRecipes.length === 0) {
+      return res.status(404).json({ message: "No saved recipes found" });
+    }
+    const recipes = await RecipeModel.find({
+      _id: { $in: user.savedRecipes },
+    }).populate("author", "fullname username");
+    res.status(200).json(recipes);
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const getRecommendations = async (req, res) => {
+  const { clerkId } = req.query;
+  console.log("Clerk ID:", clerkId);
+  try {
+    const preference = await PreferenceModel.findOne({ clerkId });
+    if (!preference) {
+      return res.status(404).json({ message: "Preferences not found" });
+    }
+
+    const recipes = await RecipeModel.find()
+      .populate("author", "fullname username")
+      .lean();
+    const recommendedRecipes = rankRecipes(recipes, {
+      dietaryPreference: preference.dietaryPreference.map((d) =>
+        d.toLowerCase()
+      ),
+      allergies: preference.allergies.map((a) => a.toLowerCase()),
+    });
+    res.status(200).json(recommendedRecipes);
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 export {
   createRecipe,
   getRecipes,
@@ -213,4 +255,6 @@ export {
   searchRecipe,
   saveRecipe,
   getUserRecipes,
+  getUserSavedRecipes,
+  getRecommendations,
 };
