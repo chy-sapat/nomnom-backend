@@ -6,11 +6,14 @@ const RepliesSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-const RatingSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-  rating: { type: Number, required: true, min: 1, max: 5 },
-  comments: { type: String, trim: true },
-});
+const RatingSchema = new mongoose.Schema(
+  {
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    rating: { type: Number, required: true, min: 1, max: 5 },
+    comments: { type: String, trim: true },
+  },
+  { timestamps: true }
+);
 
 const RecipeSchema = new mongoose.Schema(
   {
