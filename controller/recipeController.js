@@ -72,12 +72,13 @@ const getRecipeById = async (req, res) => {
       recipe.labels,
       2
     );
-    const updatedRatings = recipe.ratings.map((r) => ({
-      ...r,
-      user: r.userId,
-      userId: undefined,
-    }));
-    recipe.ratings = updatedRatings;
+    recipe.ratings = recipe.ratings.map((r) => {
+      const { userId, ...rest } = r;
+      return {
+        ...rest,
+        user: userId,
+      };
+    });
     res.status(200).json({ recipe, similar });
   } catch (error) {
     res.status(500).json({ error: error.message });

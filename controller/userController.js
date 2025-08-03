@@ -7,11 +7,12 @@ import { PreferenceModel } from "../models/Preference.js";
 const create = async (req, res) => {
   try {
     const { userId } = req.auth;
-    const { userName, fullname } = req.body;
+    const { userName, fullname, imageUrl } = req.body;
     const user = new UserModel({
       clerkId: userId,
       fullname,
       username: userName,
+      imageUrl,
     });
     await user.save();
     console.log("✅ User saved:", user);
