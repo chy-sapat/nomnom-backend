@@ -29,6 +29,7 @@ const getRecipes = async (req, res) => {
       recipes = await RecipeModel.find()
         .sort({ createdAt: -1 })
         .populate("author", "fullname username")
+        .populate("ratings.userId", "fullname username imageUrl")
         .lean();
     } else {
       recipes = await RecipeModel.find()

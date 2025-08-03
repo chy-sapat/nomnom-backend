@@ -30,7 +30,7 @@ const addOrUpdateRating = async (req, res) => {
     } else {
       // Add new rating
       recipe.ratings.push({ userId, rating, comments });
-      recipe.totalRatings += 1;
+      recipe.totalRating += 1;
     }
 
     // Calculate new average rating
