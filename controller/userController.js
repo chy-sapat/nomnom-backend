@@ -3,18 +3,17 @@ import { UserModel } from "../models/User.js";
 import { getAuth } from "@clerk/express";
 import { RecipeModel } from "../models/Recipe.js";
 import { PreferenceModel } from "../models/Preference.js";
+import { clerkClient } from "@clerk/express";
 
 const create = async (req, res) => {
   try {
     const { userId } = req.auth;
-    const { userName, fullname, imageUrl } = req.body;
-    const user = new UserModel({
-      clerkId: userId,
-      fullname,
-      username: userName,
-      imageUrl,
+    const user = await clerkClient.users.getUser(userId);
+    await UserModel.create({
+      fullname: user.fullName,
+      username: user.username,
+      imageUrl: user.imageUrl,
     });
-    await user.save();
     console.log("✅ User saved:", user);
     res.status(201).json({ message: "User Created Successfully", user });
   } catch (error) {
