@@ -68,7 +68,7 @@ const getRecipeById = async (req, res) => {
       .select("title averageRating image ingredients labels")
       .lean();
     buildTFIDF(allRecipes);
-    const similar = getSimilarRecipesByInput(
+    let similar = getSimilarRecipesByInput(
       recipe.ingredients,
       recipe.labels,
       5
