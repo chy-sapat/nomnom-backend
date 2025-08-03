@@ -29,7 +29,6 @@ const getRecipes = async (req, res) => {
       recipes = await RecipeModel.find()
         .sort({ createdAt: -1 })
         .populate("author", "fullname username")
-        .populate("ratings.userId", "fullname username imageUrl")
         .lean();
     } else {
       recipes = await RecipeModel.find()
@@ -56,10 +55,10 @@ const getRecipes = async (req, res) => {
 // Get a recipe by ID
 const getRecipeById = async (req, res) => {
   try {
-    const recipe = await RecipeModel.findById(req.params.id).populate(
-      "author",
-      "fullname username"
-    );
+    const recipe = await RecipeModel.findById(req.params.id)
+      .populate("author", "fullname username")
+      .populate("ratings.userId", "fullname username imageUrl")
+      .lean();
     if (!recipe) {
       return res.status(404).json({ message: "Recipe not found" });
     }
@@ -73,6 +72,12 @@ const getRecipeById = async (req, res) => {
       recipe.labels,
       2
     );
+    const updatedRatings = recipe.ratings.map((r) => ({
+      ...r,
+      user: r.userId,
+      userId: undefined,
+    }));
+    recipe.ratings = updatedRatings;
     res.status(200).json({ recipe, similar });
   } catch (error) {
     res.status(500).json({ error: error.message });
