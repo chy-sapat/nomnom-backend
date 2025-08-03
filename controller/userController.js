@@ -9,13 +9,15 @@ const create = async (req, res) => {
   try {
     const { userId } = req.auth;
     const user = await clerkClient.users.getUser(userId);
-    await UserModel.create({
-      fullname: user.fullName,
-      username: user.username,
-      imageUrl: user.imageUrl,
+    const newUser = new UserModel({
+      clerkId: userId,
+      fullname: user?.fullName,
+      username: user?.username,
+      imageUrl: user?.imageUrl,
     });
+    await newUser.save();
     console.log("✅ User saved:", user);
-    res.status(201).json({ message: "User Created Successfully", user });
+    res.status(201).json({ message: "User Created Successfully", newUser });
   } catch (error) {
     console.error("❌ Error saving user:", error);
     res.status(500).json({ message: error.message });
