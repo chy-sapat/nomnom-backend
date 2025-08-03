@@ -1,31 +1,39 @@
-const normalizeIngredient = (ingredientList) => {
+const normalizeIngredient = (ingredientList = []) => {
   return ingredientList
     .map((ingredient) => {
-      const part = ingredient.split(", ");
-      return part[1]?.trim().toLowerCase();
+      if (!ingredient) return null;
+      const parts = ingredient.split(", ");
+      return (parts[1] || parts[0]).trim().toLowerCase();
     })
-    .filter(Boolean); //This filters out any undefines or null values
+    .filter(Boolean);
 };
 
 const scoreRecipe = (recipe, preferences) => {
   let score = 0;
   let isUnsafe = false;
   const matchedAllergens = [];
-  const ingredientNames = normalizeIngredient(recipe.ingredients || []);
 
-  // +2 for each dietary tag match
-  preferences.dietaryPreference.forEach((pref) => {
-    if ((recipe.labels || []).includes(pref.toLowerCase())) {
+  const ingredientNames = normalizeIngredient(recipe.ingredients);
+
+  // +2 for dietary tag match
+  (preferences.dietaryPreference || []).forEach((pref) => {
+    const labelsLower = (recipe.labels || []).map((l) => l.toLowerCase());
+    if (labelsLower.includes(pref.toLowerCase())) {
       score += 2;
     }
   });
 
-  // -3 for each allergen found in ingredients
-  preferences.allergies.forEach((allergen) => {
+  // Flag allergens
+  (preferences.allergies || []).forEach((allergen) => {
+    // Create regex: match word with optional plural (e.g., "egg" or "eggs")
+    const regex = new RegExp(`\\b${allergen.toLowerCase()}(es|s)?\\b`, "i");
+
     ingredientNames.forEach((ingredient) => {
-      if (ingredient.includes(allergen.toLowerCase())) {
+      if (regex.test(ingredient)) {
         isUnsafe = true;
-        matchedAllergens.push(allergen);
+        if (!matchedAllergens.includes(allergen)) {
+          matchedAllergens.push(allergen);
+        }
       }
     });
   });
@@ -33,13 +41,17 @@ const scoreRecipe = (recipe, preferences) => {
   return { ...recipe, score, isUnsafe, matchedAllergens };
 };
 
-const rankRecipes = (recipes, preferences) => {
-  const cleanRecipes = recipes.map((recipe) =>
-    scoreRecipe(recipe, preferences)
-  );
-  return cleanRecipes
-    .filter((r) => !r.isUnsafe)
-    .sort((a, b) => b.score - a.score);
+const rankRecipes = (
+  recipes = [],
+  preferences = { dietaryPreference: [], allergies: [] }
+) => {
+  const scored = recipes.map((recipe) => scoreRecipe(recipe, preferences));
+
+  // Return safe & unsafe separately
+  return {
+    safe: scored.filter((r) => !r.isUnsafe).sort((a, b) => b.score - a.score),
+    unsafe: scored.filter((r) => r.isUnsafe),
+  };
 };
 
 export { rankRecipes };

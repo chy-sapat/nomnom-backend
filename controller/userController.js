@@ -8,6 +8,10 @@ import { clerkClient } from "@clerk/express";
 const create = async (req, res) => {
   try {
     const { userId } = req.auth;
+    const existingUser = await UserModel.findOne({ clerkId: userId });
+    if (existingUser) {
+      return res.status(401).json({ message: "User already exists" });
+    }
     const user = await clerkClient.users.getUser(userId);
     const newUser = new UserModel({
       clerkId: userId,

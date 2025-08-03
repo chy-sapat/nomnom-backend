@@ -55,6 +55,7 @@ const getRecipes = async (req, res) => {
 // Get a recipe by ID
 const getRecipeById = async (req, res) => {
   try {
+    const { userId } = req?.auth;
     const recipe = await RecipeModel.findById(req.params.id)
       .populate("author", "fullname username")
       .populate("ratings.userId", "fullname username imageUrl")
@@ -70,7 +71,7 @@ const getRecipeById = async (req, res) => {
     const similar = getSimilarRecipesByInput(
       recipe.ingredients,
       recipe.labels,
-      2
+      5
     );
     recipe.ratings = recipe.ratings.map((r) => {
       const { userId, ...rest } = r;
@@ -79,6 +80,22 @@ const getRecipeById = async (req, res) => {
         user: userId,
       };
     });
+    if (userId) {
+      const preference = await PreferenceModel.findOne({ clerkId: userId });
+      const preferenceData = {
+        dietaryPreference: preference?.dietaryPreference || [],
+        allergies: preference?.allergies || [],
+      };
+      const { safe: safeRecipe, unsafe: unsafeRecipe } = rankRecipes(
+        [recipe],
+        preferenceData
+      );
+      recipe = [...safeRecipe, ...unsafeRecipe][0]; // keep it consistent even if unsafe
+
+      // Filter similar recipes too
+      const { safe: filteredSimilar } = rankRecipes(similar, preferenceData);
+      similar = filteredSimilar;
+    }
     res.status(200).json({ recipe, similar });
   } catch (error) {
     res.status(500).json({ error: error.message });
