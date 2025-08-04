@@ -57,7 +57,7 @@ const getRecipeById = async (req, res) => {
   try {
     const { userId } = req?.auth;
     let recipe = await RecipeModel.findById(req.params.id)
-      .populate("author", "fullname username")
+      .populate("author", "fullname username imageUrl")
       .populate("ratings.userId", "fullname username imageUrl")
       .lean();
     if (!recipe) {
