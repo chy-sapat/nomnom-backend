@@ -8,6 +8,7 @@ import {
   getFollowers,
   getFollowing,
   create,
+  getOtherUserInfo,
 } from "../controller/userController.js";
 import { requireAuth } from "@clerk/express";
 
@@ -15,6 +16,7 @@ const router = express.Router();
 
 router.post("/create", create);
 router.get("/", requireAuth(), getUserInfo);
+router.get("/:userId", getOtherUserInfo);
 router.patch("/update/:id", updateUserInfo);
 router.delete("/delete/:id", deleteUser);
 router.post("/:userId/follow", followUser);

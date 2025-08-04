@@ -41,6 +41,19 @@ const getUserInfo = async (req, res) => {
   }
 };
 
+const getOtherUserInfo = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const user = await UserModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.status(200).json({ user });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 const updateUserInfo = async (req, res) => {
   try {
     const userId = req.params.id;
@@ -214,6 +227,7 @@ const FetchSaved = async (req, res) => {
 export {
   create,
   getUserInfo,
+  getOtherUserInfo,
   updateUserInfo,
   deleteUser,
   followUser,
