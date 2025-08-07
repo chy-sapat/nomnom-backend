@@ -45,10 +45,14 @@ const getOtherUserInfo = async (req, res) => {
   try {
     const { userId } = req.params;
     const user = await UserModel.findById(userId);
+    const recipes = await RecipeModel.find({ author: userId }).populate(
+      "author",
+      "fullname username"
+    );
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    res.status(200).json({ user });
+    res.status(200).json({ user, recipes });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -205,20 +209,6 @@ const getFollowing = async (req, res) => {
     }
 
     res.status(200).json(user.following);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
-const FetchSaved = async (req, res) => {
-  try {
-    const { userId } = req.params;
-    const user = await UserModel.findById(userId);
-    const savedRecipe = await RecipeModel.find({
-      _id: { $in: user.savedRecipes },
-    });
-
-    res.status(200).json({ savedRecipe });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
