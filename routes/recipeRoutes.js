@@ -12,12 +12,14 @@ import {
   getUserSavedRecipes,
   getRecommendations,
   deleteSavedRecipe,
+  getFeaturedRecipe,
 } from "../controller/recipeController.js";
 
 const router = express.Router();
 
 router.post("/", createRecipe);
 router.get("/", getRecipes);
+router.get("/featured", getFeaturedRecipe);
 router.get("/search", searchRecipe);
 router.get("/:id", getRecipeById);
 router.patch("/:id", updateRecipe);

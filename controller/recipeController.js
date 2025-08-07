@@ -18,6 +18,20 @@ const createRecipe = async (req, res) => {
   }
 };
 
+const getFeaturedRecipe = async (req, res) => {
+  try {
+    const count = await RecipeModel.countDocuments();
+    const randomIndex = Math.floor(Math.random() * count);
+    const recipe = await RecipeModel.findOne()
+      .skip(randomIndex)
+      .populate("author", "fullname username");
+    res.status(200).json(recipe);
+  } catch (error) {
+    console.error("Error fetching featured recipe:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 // Get all recipes
 const getRecipes = async (req, res) => {
   try {
@@ -305,4 +319,5 @@ export {
   getUserRecipes,
   getUserSavedRecipes,
   getRecommendations,
+  getFeaturedRecipe,
 };

@@ -26,8 +26,6 @@ function combineRecipeText(recipe) {
   const labelsText = (recipe.labels || [])
     .map((str) => str.toLowerCase().trim())
     .join(" ");
-
-  // Apply weights by repeating terms
   const weightedTitle = titleText
     .split(" ")
     .map((t) => `${t} ${t} ${t}`)
@@ -36,7 +34,7 @@ function combineRecipeText(recipe) {
     .split(" ")
     .map((t) => `${t} ${t}`)
     .join(" ");
-  const weightedLabels = labelsText; // no repetition
+  const weightedLabels = labelsText;
 
   return `${weightedTitle} ${weightedIngredients} ${weightedLabels}`;
 }
@@ -70,13 +68,11 @@ function getInputVector(title, ingredients, labels) {
 
   const text = `${weightedTitle} ${weightedIngredients} ${weightedLabels}`;
 
-  // Add the input as a temporary document
   tfidf.addDocument(text);
   const inputIndex = tfidf.documents.length - 1;
 
   const vector = allTerms.map((term) => tfidf.tfidf(term, inputIndex));
 
-  // Remove the temporary document
   tfidf.documents.pop();
 
   return vector;
