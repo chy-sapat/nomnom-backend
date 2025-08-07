@@ -56,6 +56,7 @@ const getRecipes = async (req, res) => {
 const getRecipeById = async (req, res) => {
   try {
     const { userId } = req?.auth;
+    const { limit } = req.query;
     let recipe = await RecipeModel.findById(req.params.id)
       .populate("author", "fullname username imageUrl")
       .populate("ratings.userId", "fullname username imageUrl")
@@ -69,9 +70,10 @@ const getRecipeById = async (req, res) => {
       .lean();
     buildTFIDF(allRecipes);
     let similar = getSimilarRecipesByInput(
+      recipe.title,
       recipe.ingredients,
       recipe.labels,
-      5
+      limit || 6
     );
     recipe.ratings = recipe.ratings.map((r) => {
       const { userId, ...rest } = r;

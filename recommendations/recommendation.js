@@ -19,9 +19,26 @@ function buildTFIDF(recipeList) {
 }
 
 function combineRecipeText(recipe) {
-  return [...recipe.ingredients, ...recipe.labels]
+  const titleText = (recipe.title || "").toLowerCase().trim();
+  const ingredientsText = (recipe.ingredients || [])
     .map((str) => str.toLowerCase().trim())
     .join(" ");
+  const labelsText = (recipe.labels || [])
+    .map((str) => str.toLowerCase().trim())
+    .join(" ");
+
+  // Apply weights by repeating terms
+  const weightedTitle = titleText
+    .split(" ")
+    .map((t) => `${t} ${t} ${t}`)
+    .join(" ");
+  const weightedIngredients = ingredientsText
+    .split(" ")
+    .map((t) => `${t} ${t}`)
+    .join(" ");
+  const weightedLabels = labelsText; // no repetition
+
+  return `${weightedTitle} ${weightedIngredients} ${weightedLabels}`;
 }
 
 function getRecipeVector(docIndex) {
@@ -32,18 +49,32 @@ function getRecipeVector(docIndex) {
   });
 }
 
-function getInputVector(ingredients, labels) {
-  const text = [...ingredients, ...labels]
+function getInputVector(title, ingredients, labels) {
+  const titleText = (title || "").toLowerCase().trim();
+  const ingredientsText = (ingredients || [])
     .map((str) => str.toLowerCase().trim())
     .join(" ");
+  const labelsText = (labels || [])
+    .map((str) => str.toLowerCase().trim())
+    .join(" ");
+
+  const weightedTitle = titleText
+    .split(" ")
+    .map((t) => `${t} ${t} ${t}`)
+    .join(" ");
+  const weightedIngredients = ingredientsText
+    .split(" ")
+    .map((t) => `${t} ${t}`)
+    .join(" ");
+  const weightedLabels = labelsText;
+
+  const text = `${weightedTitle} ${weightedIngredients} ${weightedLabels}`;
 
   // Add the input as a temporary document
   tfidf.addDocument(text);
   const inputIndex = tfidf.documents.length - 1;
 
-  const vector = allTerms.map((term) => {
-    return tfidf.tfidf(term, inputIndex);
-  });
+  const vector = allTerms.map((term) => tfidf.tfidf(term, inputIndex));
 
   // Remove the temporary document
   tfidf.documents.pop();
@@ -58,8 +89,8 @@ function cosineSimilarity(vecA, vecB) {
   return dot / (magA * magB || 1);
 }
 
-function getSimilarRecipesByInput(ingredients, labels, topN = 5) {
-  const inputVector = getInputVector(ingredients, labels);
+function getSimilarRecipesByInput(title, ingredients, labels, topN = 5) {
+  const inputVector = getInputVector(title, ingredients, labels);
 
   const scores = recipes.map((recipe, i) => {
     const vector = getRecipeVector(i);
@@ -72,7 +103,7 @@ function getSimilarRecipesByInput(ingredients, labels, topN = 5) {
     .slice(0, topN)
     .map(({ recipe, score }) => ({
       ...recipe,
-      similarity: score.toFixed(3), // rounded to 3 decimals (optional)
+      similarity: score.toFixed(3),
     }));
 }
 
