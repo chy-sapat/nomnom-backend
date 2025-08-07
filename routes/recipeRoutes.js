@@ -11,6 +11,7 @@ import {
   getUserRecipes,
   getUserSavedRecipes,
   getRecommendations,
+  deleteSavedRecipe,
 } from "../controller/recipeController.js";
 
 const router = express.Router();
@@ -23,6 +24,7 @@ router.patch("/:id", updateRecipe);
 router.delete("/:id", deleteRecipe);
 router.get("/getSimilar/:id", getSimilarByIngredientAndLabels);
 router.post("/save-recipe", saveRecipe);
+router.post("/delete-saved-recipe", deleteSavedRecipe);
 router.get("/getUserRecipes/:userId", getUserRecipes);
 router.get("/getUserSavedRecipes/:userId", getUserSavedRecipes);
 router.get("/recommendations", getRecommendations);

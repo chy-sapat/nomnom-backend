@@ -205,7 +205,28 @@ const saveRecipe = async (req, res) => {
     user.savedRecipes.push(recipeId);
     await user.save();
 
-    res.status(200).json({ message: "Recipe saved successfully" });
+    res.status(200).json({ message: "Recipe saved successfully", user });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const deleteSavedRecipe = async (req, res) => {
+  const { userId, recipeId } = req.body;
+  try {
+    const user = await UserModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    user.savedRecipes = user.savedRecipes.filter(
+      (id) => id.toString() !== recipeId
+    );
+    await user.save();
+
+    res
+      .status(200)
+      .json({ message: "Saved recipe deleted successfully", user });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -278,6 +299,7 @@ export {
   getSimilarByIngredientAndLabels,
   searchRecipe,
   saveRecipe,
+  deleteSavedRecipe,
   getUserRecipes,
   getUserSavedRecipes,
   getRecommendations,
