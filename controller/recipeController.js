@@ -1,6 +1,5 @@
 import { PreferenceModel } from "../models/Preference.js";
 import { RecipeModel } from "../models/Recipe.js";
-import { SearchHistoryModel } from "../models/SearchHistory.js";
 import { UserModel } from "../models/User.js";
 import { rankRecipes } from "../recommendations/preferenceFilter.js";
 import {
@@ -188,28 +187,6 @@ const searchRecipe = async (req, res) => {
       "author",
       "fullname username"
     );
-
-    let searchHistory = await SearchHistoryModel.find({ userId: uid });
-
-    if (searchHistory && recipes) {
-      const existingQuery = searchHistory.queryList.find(
-        (item) => item.query === q
-      );
-
-      if (existingQuery) {
-        existingQuery.searchFrequency += 1;
-      } else {
-        searchHistory.queryList.push({ query: q, searchFrequency: 1 });
-      }
-
-      await searchHistory.save();
-    } else {
-      searchHistory = new SearchHistoryModel({
-        userId: uid,
-        queryList: [{ query: q, searchFrequency: 1 }],
-      });
-      await searchHistory.save();
-    }
     res.status(200).json(recipes);
   } catch (err) {
     console.error("Search error:", err);
@@ -217,20 +194,6 @@ const searchRecipe = async (req, res) => {
   }
 };
 
-const clearSearchHistory = async (req, res) => {
-  const { uid } = req.body;
-  try {
-    const searchHistory = await SearchHistoryModel.findOne({ userId: uid });
-    if (searchHistory) {
-      searchHistory.query = [];
-      await searchHistory.save();
-    }
-    res.status(200).json({ message: "Search history cleared" });
-  } catch (error) {
-    console.error("Error clearing search history:", error);
-    res.status(500).json({ message: "Server error" });
-  }
-};
 const saveRecipe = async (req, res) => {
   const { userId, recipeId } = req.body;
   try {
@@ -363,5 +326,4 @@ export {
   getUserSavedRecipes,
   getRecommendations,
   getFeaturedRecipe,
-  clearSearchHistory,
 };
