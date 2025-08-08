@@ -21,7 +21,7 @@ router.post("/", createRecipe);
 router.get("/", getRecipes);
 router.get("/featured", getFeaturedRecipe);
 router.get("/search", searchRecipe);
-router.get("/recommendations", getRecommendations);
+router.get("/recommendations/:cid", getRecommendations);
 router.get("/:id", getRecipeById);
 router.patch("/:id", updateRecipe);
 router.delete("/:id", deleteRecipe);

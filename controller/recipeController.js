@@ -272,7 +272,7 @@ const getUserSavedRecipes = async (req, res) => {
 };
 
 const getRecommendations = async (req, res) => {
-  const { clerkId } = req.query;
+  const clerkId = req.params.cid;
   try {
     const preference = await PreferenceModel.findOne({ clerkId });
     if (!preference) {
