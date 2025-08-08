@@ -74,12 +74,16 @@ const updateUserInfo = async (req, res) => {
 const deleteUser = async (req, res) => {
   try {
     const userId = req.params.id;
+    const Recipes = await RecipeModel.updateMany(
+      { "ratings.userId": userId },
+      { $pull: { ratings: { userId: userId } } }
+    );
     await UserModel.findByIdAndDelete(userId);
     await RecipeModel.deleteMany({ author: userId });
     await PreferenceModel.deleteMany({ userID: userId });
     res.status(200).json({ message: "User Deleted Successfully" });
   } catch (error) {
-    res.status(500);
+    res.status(500).json({ error: error.message });
   }
 };
 

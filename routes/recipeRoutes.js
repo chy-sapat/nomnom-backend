@@ -13,6 +13,7 @@ import {
   getRecommendations,
   deleteSavedRecipe,
   getFeaturedRecipe,
+  clearSearchHistory,
 } from "../controller/recipeController.js";
 
 const router = express.Router();
@@ -21,6 +22,8 @@ router.post("/", createRecipe);
 router.get("/", getRecipes);
 router.get("/featured", getFeaturedRecipe);
 router.get("/search", searchRecipe);
+router.get("/clear-search-history", clearSearchHistory);
+router.get("/recommendations", getRecommendations);
 router.get("/:id", getRecipeById);
 router.patch("/:id", updateRecipe);
 router.delete("/:id", deleteRecipe);
@@ -29,6 +32,6 @@ router.post("/save-recipe", saveRecipe);
 router.post("/delete-saved-recipe", deleteSavedRecipe);
 router.get("/getUserRecipes/:userId", getUserRecipes);
 router.get("/getUserSavedRecipes/:userId", getUserSavedRecipes);
-router.get("/recommendations", getRecommendations);
+router.get("/getRecipeBySearchHistory/:userId", getRecipeBySearchHistory);
 
 export { router as RecipeRouter };

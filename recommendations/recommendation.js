@@ -103,4 +103,28 @@ function getSimilarRecipesByInput(title, ingredients, labels, topN = 5) {
     }));
 }
 
-export { buildTFIDF, getSimilarRecipesByInput };
+function getRecipeBySearchHistory(searchQueries, topN) {
+  const searchString = searchQueries
+    .map((str) => str.toLowerCase().trim())
+    .join(" ");
+  tfidf.addDocument(searchString);
+  const inputIndex = tfidf.documents.length - 1;
+  const inputVector = allTerms.map((term) => tfidf.tfidf(term, inputIndex));
+  tfidf.documents.pop();
+
+  const scores = recipes.map((recipe, i) => {
+    const vector = getRecipeVector(i);
+    const score = cosineSimilarity(inputVector, vector);
+    return { recipe, score };
+  });
+
+  return scores
+    .sort((a, b) => b.score - a.score)
+    .slice(0, topN)
+    .map(({ recipe, score }) => ({
+      ...recipe,
+      similarity: score.toFixed(3),
+    }));
+}
+
+export { buildTFIDF, getSimilarRecipesByInput, getRecipeBySearchHistory };

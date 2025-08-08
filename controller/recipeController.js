@@ -1,5 +1,8 @@
 import { PreferenceModel } from "../models/Preference.js";
 import { RecipeModel } from "../models/Recipe.js";
+import searchHistoryModel, {
+  SearchHistoryModel,
+} from "../models/SearchHistory.js";
 import { UserModel } from "../models/User.js";
 import { rankRecipes } from "../recommendations/preferenceFilter.js";
 import {
@@ -50,16 +53,6 @@ const getRecipes = async (req, res) => {
         .lean();
     }
 
-    if (clerkId) {
-      const preference = await PreferenceModel.findOne({ clerkId });
-      if (preference) {
-        const prefData = {
-          dietaryPreference: preference.dietaryPreference,
-          allergies: preference.allergies,
-        };
-        recipes = rankRecipes(recipes, prefData);
-      }
-    }
     res.status(200).json(recipes);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -167,7 +160,7 @@ const getSimilarByIngredientAndLabels = async (req, res) => {
 };
 
 const searchRecipe = async (req, res) => {
-  const { q, ingredient, minIngredients, maxIngredients } = req.query;
+  const { q, ingredient, minIngredients, maxIngredients, uid } = req.query;
 
   try {
     const query = {};
@@ -197,6 +190,28 @@ const searchRecipe = async (req, res) => {
       "author",
       "fullname username"
     );
+
+    let searchHistory = await SearchHistoryModel.find({ userId: uid });
+
+    if (searchHistory && recipes) {
+      const existingQuery = searchHistory.queryList.find(
+        (item) => item.query === q
+      );
+
+      if (existingQuery) {
+        existingQuery.searchFrequency += 1;
+      } else {
+        searchHistory.queryList.push({ query: q, searchFrequency: 1 });
+      }
+
+      await searchHistory.save();
+    } else {
+      searchHistory = new SearchHistoryModel({
+        userId: uid,
+        queryList: [{ query: q, searchFrequency: 1 }],
+      });
+      await searchHistory.save();
+    }
     res.status(200).json(recipes);
   } catch (err) {
     console.error("Search error:", err);
@@ -204,6 +219,20 @@ const searchRecipe = async (req, res) => {
   }
 };
 
+const clearSearchHistory = async (req, res) => {
+  const { uid } = req.body;
+  try {
+    const searchHistory = await SearchHistoryModel.findOne({ userId: uid });
+    if (searchHistory) {
+      searchHistory.query = [];
+      await searchHistory.save();
+    }
+    res.status(200).json({ message: "Search history cleared" });
+  } catch (error) {
+    console.error("Error clearing search history:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 const saveRecipe = async (req, res) => {
   const { userId, recipeId } = req.body;
   try {
@@ -283,7 +312,6 @@ const getUserSavedRecipes = async (req, res) => {
 
 const getRecommendations = async (req, res) => {
   const { clerkId } = req.query;
-  console.log("Clerk ID:", clerkId);
   try {
     const preference = await PreferenceModel.findOne({ clerkId });
     if (!preference) {
@@ -306,6 +334,23 @@ const getRecommendations = async (req, res) => {
   }
 };
 
+const getRecipeBySearchHistory = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const recipes = await RecipeModel.find({});
+    const searchHistory = await SearchHistoryModel.findOne({ userId: userId });
+    buildTFIDF(recipes);
+    const recommendedRecipes = getRecipeBySearchHistory(
+      searchHistory.queries,
+      5
+    );
+    res.status(200).json(recommendedRecipes);
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 export {
   createRecipe,
   getRecipes,
@@ -320,4 +365,5 @@ export {
   getUserSavedRecipes,
   getRecommendations,
   getFeaturedRecipe,
+  clearSearchHistory,
 };
