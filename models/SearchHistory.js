@@ -2,7 +2,7 @@ import { Schema } from "mongoose";
 
 const QuerySchema = new Schema(
   {
-    query: { type: string },
+    query: { type: String },
     searchFrequency: { type: Number, default: 0 },
   },
   { timestamps: true }
