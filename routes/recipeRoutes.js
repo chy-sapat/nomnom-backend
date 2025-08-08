@@ -13,7 +13,6 @@ import {
   getRecommendations,
   deleteSavedRecipe,
   getFeaturedRecipe,
-  clearSearchHistory,
 } from "../controller/recipeController.js";
 
 const router = express.Router();
