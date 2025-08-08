@@ -1,8 +1,6 @@
 import { PreferenceModel } from "../models/Preference.js";
 import { RecipeModel } from "../models/Recipe.js";
-import searchHistoryModel, {
-  SearchHistoryModel,
-} from "../models/SearchHistory.js";
+import { SearchHistoryModel } from "../models/SearchHistory.js";
 import { UserModel } from "../models/User.js";
 import { rankRecipes } from "../recommendations/preferenceFilter.js";
 import {
